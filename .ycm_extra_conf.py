@@ -36,6 +36,8 @@ import ycm_core
 flags = [
     '-x',
     'c',
+    '-framework',
+    'CoreFoudation',
 ]
 
 
