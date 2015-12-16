@@ -6,7 +6,7 @@ SRCS = \
 	dispatch_cascade.c \
 	dispatch_cf_main.c \
 	dispatch_concur.c \
-	dispatch_context_for_key.c
+	dispatch_context_for_key.c \
 	dispatch_data.c \
 	dispatch_deadname.c \
 	dispatch_debug.c \
@@ -40,24 +40,26 @@ SRCS = \
 
 OBJS = $(subst .c,.o,$(SRCS))
 
-CFLAGS = 
-LIBS = 
+CFLAGS = -I./dispatch
+LIBS = -framework CoreFoundation
 TARGET = $(subst .c,,$(SRCS))
 
 .SUFFIXES: .c .o
 
 all : $(TARGET)
 
+$(TARGET) : $(OBJS)
+	${CC} -o $@ $(OBJS) $(LIBS)
+
+.c.o :
+	${CC} -c $(CFLAGS) -I. $< -o $@
+
+clean :
+	rm -f *.o $(TARGET)
+
 debug:
 	@echo "SRCS: ${SRCS}"
 	@echo "OBJS: ${OBJS}"
 	@echo "TARGET: ${TARGET}"
 
-# $(TARGET) : $(OBJS)
-# 	gcc -o $@ $(OBJS) $(LIBS)
-#
-# .c.o :
-# 	gcc -c $(CFLAGS) -I. $< -o $@
-#
-clean :
-	rm -f *.o $(TARGET)
+.PHONY: clean debug
