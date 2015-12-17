@@ -144,13 +144,8 @@ test_context_for_key(void)
 int
 main(void)
 {
-	/* dispatch_test_start("Dispatch Queue Specific"); // rdar://problem/8429188 */
-
 	dispatch_async(dispatch_get_main_queue(), ^{
-/* #if DISPATCH_API_VERSION >= 20100825 && DISPATCH_API_VERSION != 20101110 */
 		test_context_for_key();
-/* #endif */
-		/* test_stop(); */
 	});
 	dispatch_main();
 }
