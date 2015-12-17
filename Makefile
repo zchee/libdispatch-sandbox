@@ -1,7 +1,8 @@
 SRCS = \
-	dispatch_context_for_key.c
+	dispatch_context_for_key.c \
+	dispatch_api.c \
+	dispatch_proc.c
 	# dispatch_after.c \
-	# dispatch_api.c \
 	# dispatch_apply.c \
 	# dispatch_c99.c \
 	# dispatch_cascade.c \
@@ -17,7 +18,6 @@ SRCS = \
 	# dispatch_overcommit.c \
 	# dispatch_pingpong.c \
 	# dispatch_priority.c \
-	# dispatch_proc.c \
 	# dispatch_queue_finalizer.c \
 	# dispatch_read.c \
 	# dispatch_read2.c \
@@ -50,6 +50,7 @@ all : $(TARGET)
 
 $(TARGET) : $(OBJS)
 	${CC} -o $@ $(OBJS) $(LIBS)
+	./dispatch_api
 
 .c.o :
 	${CC} -c $(CFLAGS) -I. $< -o $@
