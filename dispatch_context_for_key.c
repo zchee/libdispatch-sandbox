@@ -26,8 +26,6 @@
 
 #include "dispatch_test.h"
 
-#if DISPATCH_API_VERSION >= 20100825 && DISPATCH_API_VERSION != 20101110
-
 static char *ctxts[] = {"ctxt for app", "ctxt for key 1",
 		"ctxt for key 2", "ctxt for key 1 bis", "ctxt for key 4"};
 volatile long ctxts_destroyed;
@@ -45,20 +43,15 @@ static void
 test_context_for_key(void)
 {
 	g = dispatch_group_create();
+
 	dispatch_queue_t q = dispatch_queue_create("q", NULL);
-#if DISPATCH_API_VERSION >= 20100518
 	dispatch_queue_t tq = dispatch_queue_create("tq", DISPATCH_QUEUE_CONCURRENT);
-#else
-	dispatch_queue_t tq = dispatch_queue_create("tq", NULL);
-	dispatch_queue_set_width(tq, LONG_MAX);
-#endif
 	dispatch_queue_t ttq = dispatch_get_global_queue(0, 0);
+
 	dispatch_group_enter(g);
-#if DISPATCH_API_VERSION >= 20101011
+
 	dispatch_queue_set_specific(tq, &ctxts[4], ctxts[4], destructor);
-#else
-	dispatch_set_context_for_key(tq, &ctxts[4], ctxts[4], ttq, destructor);
-#endif
+
 	dispatch_set_target_queue(tq, ttq);
 	dispatch_group_enter(g);
 	dispatch_set_context(q, ctxts[0]);
@@ -67,67 +60,39 @@ test_context_for_key(void)
 
 	dispatch_async(q, ^{
 		dispatch_group_enter(g);
-#if DISPATCH_API_VERSION >= 20101011
 		dispatch_queue_set_specific(q, &ctxts[1], ctxts[1], destructor);
-#else
-		dispatch_set_context_for_key(q, &ctxts[1], ctxts[1], ttq, destructor);
-#endif
 	});
 	dispatch_retain(q);
 	dispatch_async(dispatch_get_global_queue(0, 0), ^{
 		dispatch_group_enter(g);
-#if DISPATCH_API_VERSION >= 20101011
 		dispatch_queue_set_specific(q, &ctxts[2], ctxts[2], destructor);
-#else
-		dispatch_set_context_for_key(q, &ctxts[2], ctxts[2], ttq, destructor);
-#endif
 		dispatch_async(dispatch_get_global_queue(0, 0), ^{
 			void *ctxt;
-#if DISPATCH_API_VERSION >= 20101011
 			ctxt = dispatch_queue_get_specific(q, &ctxts[2]);
-#else
-			ctxt = dispatch_get_context_for_key(q, &ctxts[2]);
-#endif
 			printf("get context for key 2 %s %s", ctxt, ctxts[2]);
 			dispatch_release(q);
 		});
 	});
 	dispatch_async(q, ^{
 		void *ctxt;
-#if DISPATCH_API_VERSION >= 20101011
 		ctxt = dispatch_get_specific(&ctxts[1]);
 		printf("get current context for key 1 %s %s", ctxt, ctxts[1]);
 		ctxt = dispatch_get_specific(&ctxts[4]);
 		printf("get current context for key 1 %s %s", ctxt, ctxts[4]);
 		ctxt = dispatch_queue_get_specific(q, &ctxts[1]);
-#else
-		ctxt = dispatch_get_context_for_key(tq, &ctxts[4]);
-		printf("get context for key 4 (on target queue) %s %s", ctxt, ctxts[4]);
-		ctxt = dispatch_get_context_for_key(q, &ctxts[1]);
-#endif
 		printf("get context for key 1 %s %s", ctxt, ctxts[1]);
 	});
 	dispatch_async(q, ^{
 		dispatch_group_enter(g);
 		void *ctxt;
-#if DISPATCH_API_VERSION >= 20101011
 		dispatch_queue_set_specific(q, &ctxts[1], ctxts[3], destructor);
 		ctxt = dispatch_queue_get_specific(q, &ctxts[1]);
-#else
-		dispatch_set_context_for_key(q, &ctxts[1], ctxts[3], ttq, destructor);
-		ctxt = dispatch_get_context_for_key(q, &ctxts[1]);
-#endif
 		printf("get context for key 1 %s %s", ctxt, ctxts[3]);
 	});
 	dispatch_async(q, ^{
 		void *ctxt;
-#if DISPATCH_API_VERSION >= 20101011
 		dispatch_queue_set_specific(q, &ctxts[1], NULL, destructor);
 		ctxt = dispatch_queue_get_specific(q, &ctxts[1]);
-#else
-		dispatch_set_context_for_key(q, &ctxts[1], NULL, ttq, destructor);
-		ctxt = dispatch_get_context_for_key(q, &ctxts[1]);
-#endif
 		printf("get context for key 1 %s", ctxt);
 	});
 	void *ctxt = dispatch_get_context(q);
@@ -138,7 +103,6 @@ test_context_for_key(void)
 	printf("contexts destroyed %ld %d", ctxts_destroyed, 5);
 	dispatch_release(g);
 }
-#endif
 
 int
 main(void)
