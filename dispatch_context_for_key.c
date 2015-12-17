@@ -24,7 +24,6 @@
 #include <unistd.h>
 #include <assert.h>
 
-#include "bsdtests.h"
 #include "dispatch_test.h"
 
 #if DISPATCH_API_VERSION >= 20100825 && DISPATCH_API_VERSION != 20101110
